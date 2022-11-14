@@ -14,9 +14,12 @@
             background-image: linear-gradient(
                 -225deg,
                 #231557 0%,
-                #44107a 29%,
-                #ff1361 67%,
-                #fff800 100%
+                #44107a 19%,
+                #ff1361 37%,
+                #fff800 50%,
+                #ff1361 77%,
+                #44107a 90%,
+                #231557 100%
             );
             background-size: auto auto;
             background-clip: border-box;
@@ -26,7 +29,7 @@
             /* text-fill-color: transparent; */
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: textclip 12s linear infinite;
+            animation: textclip 20s linear infinite;
        
                 /* font-size: 190px; */
                 text-align: center;
@@ -139,6 +142,7 @@
                     for (let i = 0; i < response.types.length; i++) {
                         currentType.push(response.types[i].type.name);
                     }
+                    console.log(response.weight);
                     let types = currentType.join(", ");
                     $("#pokemonType").text("Type: "+ types);
                     
