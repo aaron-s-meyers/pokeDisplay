@@ -175,14 +175,12 @@
                         );
                         break;
                     case "revealPokemon":
-                        if ($("#pokemonImg").css("visibility")=== "hidden"){
+                        if ($("#pokemonImg").css("visibility") === "hidden"){
                             playSound("https://www.myinstants.com/media/sounds/pokeball_sound_effects_mp3cut_1.mp3");
                             setTimeout(() => {
                                 $("#pokeball").addClass("pokeball");
                                 $("#pokeball__button").addClass("pokeball__button");
                             }, 1000);
-                            
-
                             setTimeout(() => {
                                 removePokemon();
                             }, 5000);
@@ -223,12 +221,10 @@
             };
 
             setInterval(() => {
-                sendMsg(JSON.stringify({message: "keepalive"}));
+                myWebSocket.send((JSON.stringify({message: "keepalive"})));
             }, 240000);
         }
 
-
-            // showPokemon(randomIntFromInterval(0, 807));
 
         function randomIntFromInterval(min, max) {
             return Math.floor(Math.random() * (max - min + 1) + min)
