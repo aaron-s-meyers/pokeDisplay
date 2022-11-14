@@ -177,8 +177,11 @@
                     case "revealPokemon":
                         if ($("#pokemonImg").css("visibility")=== "hidden"){
                             playSound("https://www.myinstants.com/media/sounds/pokeball_sound_effects_mp3cut_1.mp3");
-                            $("#pokeball").addClass("pokeball");
-                            $("#pokeball__button").addClass("pokeball__button");
+                            setTimeout(() => {
+                                $("#pokeball").addClass("pokeball");
+                                $("#pokeball__button").addClass("pokeball__button");
+                            }, 1000);
+                            
 
                             setTimeout(() => {
                                 removePokemon();
