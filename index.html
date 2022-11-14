@@ -221,6 +221,10 @@
             myWebSocket.onerror = function(evt) {
                 console.log("Error!");
             };
+
+            setInterval(() => {
+                sendMsg(JSON.stringify({message: "keepalive"}));
+            }, 240000);
         }
 
 
