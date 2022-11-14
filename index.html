@@ -56,7 +56,86 @@
                 margin-right: auto;
                 width: 50%;
                 visibility: hidden;
-                }
+            }
+
+        
+            /* pokeball */
+            *, *:before, *:after {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            }
+            /* body {
+            background: #ecf0f1;
+            } */
+            .center-on-page {
+            position: absolute;
+            top: 45vw;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            }
+            /* Poké Styles */
+            .pokeball {
+                /* visibility: hidden; */
+            position: relative;
+            width: 200px;
+            height: 200px;
+            background: #fff;
+            border: 10px solid #000;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: inset -10px 10px 0 10px #ccc;
+            animation: fall .25s ease-in-out,
+                        shake 1.25s cubic-bezier(.36,.07,.19,.97) 3;
+            }
+            .pokeball::before,
+            .pokeball::after {
+            content:"";
+            position: absolute;
+            }
+            .pokeball::before {
+            background: red;
+            width: 100%;
+            height: 50%;
+            }
+            .pokeball::after {
+            top: calc(50% - 10px);
+            width: 100%;
+            height: 20px;
+            background: #000;
+            }
+            .pokeball__button {
+            position: absolute;
+            top: calc(50% - 30px);
+            left: calc(50% - 30px);
+            width: 60px;
+            height: 60px;
+            background: #7f8c8d;
+            border: 10px solid #fff;
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 0 0 10px black;
+            animation: blink .5s alternate 7;
+            }
+            /* Animation */
+            @keyframes blink {
+            from { background: #eee;}
+            to { background: #e74c3c; }
+            }
+            @keyframes shake {
+            0 { transform: translate(0, 0) rotate(0); }
+            20% { transform: translate(-10px, 0) rotate(-20deg); }
+            30% { transform: translate(10px, 0) rotate(20deg); }
+            50% { transform: translate(-10px, 0) rotate(-10deg); }
+            60% { transform: translate(10px, 0) rotate(10deg); }
+            100% { transform: translate(0, 0) rotate(0); }
+            }
+            @keyframes fall {
+            0% { top: -200px }
+            60% { top: 0 }
+            80% { top: -20px }
+            100% { top: 0 }
+            }
         </style>
         <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
         <script type="text/javascript">
@@ -74,13 +153,13 @@
             myWebSocket = new WebSocket(endpoint);
     
             myWebSocket.onmessage = function(event) {
-                var leng;
-                if (event.data.size === undefined) {
-                    leng = event.data.length
-                } else {
-                    leng = event.data.size
-                }
-                console.log("onmessage. size: " + leng + ", content: " + event.data);
+                // var leng;
+                // if (event.data.size === undefined) {
+                //     leng = event.data.length
+                // } else {
+                //     leng = event.data.size
+                // }
+                console.log(event.data);
                 let parsed = JSON.parse(event.data);
                 switch (parsed.message) {
                     case "pickNew":
@@ -96,14 +175,36 @@
                         );
                         break;
                     case "revealPokemon":
-                        $("#pokemonImg").css("visibility", 
-                            $("#pokemonImg").css("visibility") === "visible"? "hidden":"visible"
-                        );
+                        if ($("#pokemonImg").css("visibility")=== "hidden"){
+                            playSound("https://www.myinstants.com/media/sounds/pokeball_sound_effects_mp3cut_1.mp3");
+                            $("#pokeball").addClass("pokeball");
+                            $("#pokeball__button").addClass("pokeball__button");
+
+                            setTimeout(() => {
+                                removePokemon();
+                            }, 5000);
+                        }else{
+                            removePokemon();
+                        }
+                        function removePokemon(){
+                            $("#pokeball").removeClass("pokeball");
+                                $("#pokeball__button").removeClass("pokeball__button");
+
+                                $("#pokemonImg").css("visibility", 
+                                    $("#pokemonImg").css("visibility") === "visible"? "hidden":"visible"
+                                );
+                        }                        
                         break;
                     default:
                         break;
                 }
                 
+            }
+
+            function playSound(url) {
+                var a = new Audio(url);
+                a.volume = 0.3;
+                a.play();
             }
     
             myWebSocket.onopen = function(evt) {
@@ -122,42 +223,42 @@
 
             // showPokemon(randomIntFromInterval(0, 807));
 
-            function randomIntFromInterval(min, max) {
-                return Math.floor(Math.random() * (max - min + 1) + min)
-            }
+        function randomIntFromInterval(min, max) {
+            return Math.floor(Math.random() * (max - min + 1) + min)
+        }
 
-            function showPokemon(providedId) {
-                // let [min, max] = $("#gen_select").val().split(",");
-                // [min, max] = [Number(min), Number(max)];
-                // pokemonId = Math.floor(Math.random() * (max + 1 - min)) + min;
-                if(providedId) {
-                    pokemonId = providedId;
-                }
-                $.get(`https://pokeapi.co/api/v2/pokemon/${pokemonId}/`, function(response) {
-                    let pokemonName = "";
-                    pokemonName = response.species.name;
-                    pokemonName = "Currently Drawing: " + pokemonName[0].toUpperCase() + pokemonName.substr(1);
-                    $("#pokemonName").text(pokemonName);
-                    let currentType = [];
-                    for (let i = 0; i < response.types.length; i++) {
-                        currentType.push(response.types[i].type.name);
-                    }
-                    console.log(response.weight);
-                    let types = currentType.join(", ");
-                    $("#pokemonType").text("Type: "+ types);
-                    
-                    let pokemonImg = response.sprites.other["official-artwork"].front_default;
-                    // let pokemonImg = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + pokemonId + ".png";
-                    // console.log(pokemonImg)
-                    $("#pokemonImg").attr("src", pokemonImg);
-                    // let img = new Image();
-                    // img.setAttribute('crossOrigin', 'anonymous');
-                    // img.src = pokemonImg;
-                    // img.onload = function() {
-                    //     makeSilhouette(img);
-                    // }
-                });
+        function showPokemon(providedId) {
+            // let [min, max] = $("#gen_select").val().split(",");
+            // [min, max] = [Number(min), Number(max)];
+            // pokemonId = Math.floor(Math.random() * (max + 1 - min)) + min;
+            if(providedId) {
+                pokemonId = providedId;
             }
+            $.get(`https://pokeapi.co/api/v2/pokemon/${pokemonId}/`, function(response) {
+                let pokemonName = "";
+                pokemonName = response.species.name;
+                pokemonName = "Currently Drawing: " + pokemonName[0].toUpperCase() + pokemonName.substr(1);
+                $("#pokemonName").text(pokemonName);
+                let currentType = [];
+                for (let i = 0; i < response.types.length; i++) {
+                    currentType.push(response.types[i].type.name);
+                }
+                console.log(response.weight);
+                let types = currentType.join(", ");
+                $("#pokemonType").text("Type: "+ types);
+                
+                let pokemonImg = response.sprites.other["official-artwork"].front_default;
+                // let pokemonImg = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + pokemonId + ".png";
+                // console.log(pokemonImg)
+                $("#pokemonImg").attr("src", pokemonImg);
+                // let img = new Image();
+                // img.setAttribute('crossOrigin', 'anonymous');
+                // img.src = pokemonImg;
+                // img.onload = function() {
+                //     makeSilhouette(img);
+                // }
+            });
+        }
     
         </script>
     </head>
@@ -167,7 +268,14 @@
             <h1 id = "pokemonName" class = "pokemonName"> </h1>
             <h2 id = "pokemonType" class = "pokemonName"></h2>
             <img id = "pokemonImg" class="pokemonImg">
+            <div class="center-on-page">
+                <div id ="pokeball" >
+                  <div id ="pokeball__button"  ></div>
+                </div>
+            </div>
         </div>
+        
+
     
     
     </body>
