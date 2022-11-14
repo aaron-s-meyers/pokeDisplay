@@ -1,0 +1,170 @@
+
+<html>
+    <head>
+        <style>
+            body{
+                background-color: transparent;
+            }
+            /* .pokemon{
+                visibility: hidden;
+            } */
+
+            .pokemonName{
+            text-transform: uppercase;
+            background-image: linear-gradient(
+                -225deg,
+                #231557 0%,
+                #44107a 29%,
+                #ff1361 67%,
+                #fff800 100%
+            );
+            background-size: auto auto;
+            background-clip: border-box;
+            background-size: 200% auto;
+            color: #fff;
+            background-clip: text;
+            /* text-fill-color: transparent; */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textclip 12s linear infinite;
+       
+                /* font-size: 190px; */
+                text-align: center;
+                font-size:5vw;
+                margin-top: 0;
+                margin-bottom: 0;
+                font-family: "Montserrat", sans-serif;
+            }
+
+            @keyframes textclip {
+            to {
+                background-position: 200% center;
+            }
+            }
+
+            /* .pokemonName{
+                text-align: center;
+                font-size:5vw;
+                margin-bottom: 0;
+            } */
+            .pokemonImg {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                width: 50%;
+                visibility: hidden;
+                }
+        </style>
+        <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+        <script type="text/javascript">
+
+
+        var myWebSocket;
+        connectToWS();
+        function connectToWS() {
+            let endpoint = "wss://confusion-woozy-ozraraptor.glitch.me/";
+            // var endpoint = document.getElementById("endpoint").value;
+            if (myWebSocket !== undefined) {
+                myWebSocket.close()
+            }
+    
+            myWebSocket = new WebSocket(endpoint);
+    
+            myWebSocket.onmessage = function(event) {
+                var leng;
+                if (event.data.size === undefined) {
+                    leng = event.data.length
+                } else {
+                    leng = event.data.size
+                }
+                console.log("onmessage. size: " + leng + ", content: " + event.data);
+                let parsed = JSON.parse(event.data);
+                switch (parsed.message) {
+                    case "pickNew":
+                        if(parsed.id > 0){
+                            $("#pokemonImg").css("visibility", "hidden");
+                            $("#pokemonType").css("visibility", "hidden");
+                            showPokemon(parsed.id);
+                        }
+                        break;
+                    case "revealType":
+                        $("#pokemonType").css("visibility", 
+                            $("#pokemonType").css("visibility") === "visible"? "hidden":"visible"
+                        );
+                        break;
+                    case "revealPokemon":
+                        $("#pokemonImg").css("visibility", 
+                            $("#pokemonImg").css("visibility") === "visible"? "hidden":"visible"
+                        );
+                        break;
+                    default:
+                        break;
+                }
+                
+            }
+    
+            myWebSocket.onopen = function(evt) {
+                console.log("onopen.");
+            };
+    
+            myWebSocket.onclose = function(evt) {
+                console.log("onclose.");
+            };
+    
+            myWebSocket.onerror = function(evt) {
+                console.log("Error!");
+            };
+        }
+
+
+            // showPokemon(randomIntFromInterval(0, 807));
+
+            function randomIntFromInterval(min, max) {
+                return Math.floor(Math.random() * (max - min + 1) + min)
+            }
+
+            function showPokemon(providedId) {
+                // let [min, max] = $("#gen_select").val().split(",");
+                // [min, max] = [Number(min), Number(max)];
+                // pokemonId = Math.floor(Math.random() * (max + 1 - min)) + min;
+                if(providedId) {
+                    pokemonId = providedId;
+                }
+                $.get(`https://pokeapi.co/api/v2/pokemon/${pokemonId}/`, function(response) {
+                    let pokemonName = "";
+                    pokemonName = response.species.name;
+                    pokemonName = "Currently Drawing: " + pokemonName[0].toUpperCase() + pokemonName.substr(1);
+                    $("#pokemonName").text(pokemonName);
+                    let currentType = [];
+                    for (let i = 0; i < response.types.length; i++) {
+                        currentType.push(response.types[i].type.name);
+                    }
+                    let types = currentType.join(", ");
+                    $("#pokemonType").text("Type: "+ types);
+                    
+                    let pokemonImg = response.sprites.other["official-artwork"].front_default;
+                    // let pokemonImg = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + pokemonId + ".png";
+                    // console.log(pokemonImg)
+                    $("#pokemonImg").attr("src", pokemonImg);
+                    // let img = new Image();
+                    // img.setAttribute('crossOrigin', 'anonymous');
+                    // img.src = pokemonImg;
+                    // img.onload = function() {
+                    //     makeSilhouette(img);
+                    // }
+                });
+            }
+    
+        </script>
+    </head>
+    <body>
+    
+        <div class="pokemon">
+            <h1 id = "pokemonName" class = "pokemonName"> </h1>
+            <h2 id = "pokemonType" class = "pokemonName"></h2>
+            <img id = "pokemonImg" class="pokemonImg">
+        </div>
+    
+    
+    </body>
+    </html>
